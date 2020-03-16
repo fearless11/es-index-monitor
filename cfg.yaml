@@ -1,0 +1,21 @@
+# 并发数
+goroutine: 4
+
+elastic:
+  url: ["http://10.51.1.31:9201"]
+  user: "abc"
+  password: "abc"
+  # 查询最近多长时间的数据,默认单位为分钟
+  interval: 10
+  # 错误数阈值
+  threshold: 1
+  
+indices:
+- name: "crm-frontend-app-nginx"
+  app: "php"
+  lv: "ERROR"
+  
+alert:
+  url: "http://127.0.0.1:9093/api/v1/alert"
+  from: "ElasticLog"
+  level: "C"
