@@ -7,37 +7,37 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// Config 顶层配置
 type Config struct {
 	Goroutine int        `yaml:"goroutine"`
+	Ticker    int        `yaml:"ticker"`
+	Interval  int        `yaml:"interval"`
+	Overcount int        `yaml:"overcount"`
 	Elastic   *Elastic   `yaml:"elastic"`
 	Indices   []*Indices `yaml:"indices"`
 	Alert     *Alert     `yaml:"alert"`
 }
 
 type Elastic struct {
-	URL       []string `yaml:"url"`
-	User      string   `yaml:"user"`
-	Password  string   `yaml:"password"`
-	Interval  int      `yaml:"interval"`
-	Threshold int      `yaml:"threshold"`
+	URL      []string `yaml:"url"`
+	User     string   `yaml:"user"`
+	Password string   `yaml:"password"`
 }
 
 type Indices struct {
-	Name string `yaml:"name"`
-	App  string `yaml:"app"`
-	Lv   string `yaml:"lv"`
-	Msg  string `yaml:"msg,omitempty"`
+	Name      string `yaml:"name"`
+	Type      string `yaml:"type"`
+	Interval  int    `yaml:"interval,omitempty"`
+	Overcount int    `yaml:"overcount,omitempty"`
+	Include   string `yaml:"include"`
+	Exclude   string `yaml:"exclude,omitempty"`
 }
 
-// Alert 告警
 type Alert struct {
 	URL   string `yaml:"url"`
 	From  string `yaml:"from"`
 	Level string `yaml:"level"`
 }
 
-// LoadFile 读yaml文件
 func LoadFile(filename string) *Config {
 	content, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -51,12 +51,21 @@ func LoadFile(filename string) *Config {
 	return cfg
 }
 
-// Load 解析yaml文件
 func Load(s string) (*Config, error) {
 	cfg := &Config{}
 	err := yaml.Unmarshal([]byte(s), cfg)
 	if err != nil {
 		return nil, err
 	}
+
+	for _, index := range cfg.Indices {
+		if index.Interval == 0 {
+			index.Interval = cfg.Interval
+		}
+		if index.Overcount == 0 {
+			index.Overcount = cfg.Overcount
+		}
+	}
+
 	return cfg, nil
 }

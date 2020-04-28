@@ -1,21 +1,56 @@
 # 并发数
 goroutine: 4
+# 定时器/minute
+ticker: 5
+# 默认查询间隔/分钟minute
+interval: 5
+# 默认告警阈值/条
+overcount: 100
 
 elastic:
   url: ["http://10.51.1.31:9201"]
   user: "abc"
   password: "abc"
-  # 查询最近多长时间的数据,默认单位为分钟
-  interval: 10
-  # 错误数阈值
-  threshold: 1
-  
+
+
+# 索引为 name-yyyy.MM.dd
+# 时间字段默认 @timestamp
+# 等于
 indices:
 - name: "crm-frontend-app-nginx"
-  app: "php"
-  lv: "ERROR"
+  type: "eq"
+  include: "status=400"
+  # 查询间隔
+  interval: 720
+  # 告警阈值
+  overcount: 80
+
+# 大于
+- name: "crm-frontend-app-nginx"
+  type: "gt"
+  interval: 720
+  overcount: 100
+  include: "request_time>60"
+  exclude: "status=101;status=499"
+- name: "gitlab"
+  type: "eq"
+  interval: 720
+  overcount: 80
+  include: "response_status=200"
+
+# 聚合
+- name: "gitlab"
+  type: "agg"
+  interval: 60
+  overcount: 100
+  # 聚合字段=聚合排序后top5
+  include: "user=5"
+  # 排除个例
+  exclude: "user=-;user=Tom"
   
 alert:
-  url: "http://127.0.0.1:9093/api/v1/alert"
+  url: "http://127.0.0.1:9000/api/v1/alert"
   from: "ElasticLog"
   level: "C"
+
+  

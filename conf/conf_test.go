@@ -4,19 +4,26 @@ import "testing"
 
 var cfgStr = `
 goroutine: 4
+interval: 5
+overcount: 50
 
 elastic:
-  url: "http://127.0.0.1:9092"
+  url: ["http://127.0.0.1:9092"]
   user: "elastic"
   password: "abc"
-  interval: 200
-  threshold: 1
-  
+
 indices:
-- name: "salary"
-  app: "xxx"
-  lv: "INFO"
-  msg: "xxsss"
+- name: "crm-frontend-app-nginx"
+  type: "eq"
+  include: "status=500"
+  interval: 5
+  overcount: 50
+- name: "crm-frontend-app-nginx"
+  type: "gt"
+  interval: 5
+  overcount: 50
+  include: "request_time>60"
+  exclude: "status=101;status=499"
   
 alert:
   url: "http://127.0.0.1:9093/api/v1/alert"

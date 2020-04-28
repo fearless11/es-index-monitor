@@ -1,4 +1,17 @@
 
 ## 功能
 
-- 查询ES中业务日志,当错误级别为ERROR且数量在10分钟内超过100则发送告警
+   对elastic中业务日志进行监控,支持条数超过阈值告警
+
+    条件: 索引为name-yyyy.MM.dd, 时间字段为@timestamp
+
+- 指定时间范围，字段等于特定值出现的次数超阈值告警  
+   
+   `count(A=xx;B=xx) > threshold in x minute`
+- 指定时间范围，某个字段大于特定值出现的次数超阈值告警,可选支持排除条件 
+
+  `count(A>xx) && !(B=yy;B=zz) > threshold in x minute`
+- 指定时间范围，按某个字段聚合分组后，前topX出现次数超阈值告警,可选支持排除某组  
+  
+  `count(top(agg(A))) && !(A=xx) > threshold in  5minute`
+

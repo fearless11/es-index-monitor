@@ -4,8 +4,7 @@ import (
 	"sync"
 )
 
-// 任务通过管道传递后消费
-
+// Worker manager a set of consumer
 type Worker interface {
 	Task()
 }
