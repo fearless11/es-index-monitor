@@ -16,6 +16,8 @@ import (
 	"gopkg.in/olivere/elastic.v5"
 )
 
+// https://godoc.org/gopkg.in/olivere/elastic.v5
+
 type ES struct {
 	conn      *elastic.Client
 	index     *conf.Indices
