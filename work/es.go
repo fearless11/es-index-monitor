@@ -92,13 +92,17 @@ func (e *ES) search(start time.Time, end time.Time, index string) {
 			log.Println(err)
 			return
 		}
-		agg := elastic.NewTermsAggregation().Field(tmp[0]).Size(int(size)).OrderByCountDesc()
+
+		// 多字段查询
+		agg := elastic.NewTermsAggregation().Script(elastic.NewScript(tmp[0])).Exclude(e.index.Exclude).Size(int(size)).OrderByCountDesc()
+		// aggUser := elastic.NewTermsAggregation().Field(tmp[0]).Size(int(size)).OrderByCountDesc()
 		results, err := e.conn.Search(index).Size(0).Query(rangeQ).Aggregation("tmps", agg).Do(context.Background())
 		if err != nil {
 			log.Println(err)
 			return
 		}
-		e.handleAggResults(index, results)
+		// e.handleAggResults(index, results)
+		e.handleAgg(index, results)
 	}
 }
 
@@ -106,7 +110,7 @@ func (e *ES) execute(index string, query *elastic.BoolQuery) {
 	scroll := elastic.NewScrollService(e.conn)
 	result, err := scroll.Index(index).Query(query).KeepAlive("1m").Size(4000).Do(context.Background())
 	if err != nil && err != io.EOF {
-		log.Println(err)
+		log.Println(err, index)
 		return
 	}
 
@@ -117,6 +121,20 @@ func (e *ES) execute(index string, query *elastic.BoolQuery) {
 	}
 }
 
+func (e *ES) handleAgg(index string, aggResult *elastic.SearchResult) {
+	items, ok := aggResult.Aggregations.Terms("tmps")
+	if !ok {
+		return
+	}
+	for _, item := range items.Buckets {
+		if item.DocCount > int64(e.index.Overcount) {
+			txt := fmt.Sprintf("%v分钟内%v的数量为%v,超过阈值%v", e.index.Interval, item.Key, item.DocCount, e.index.Overcount)
+			e.alert.Send(fmt.Sprintf("%v (%v)", index, item.Key), txt)
+		}
+	}
+}
+
+// handleAggResults 处理结果排除某个字段
 func (e *ES) handleAggResults(index string, aggResult *elastic.SearchResult) {
 	items, ok := aggResult.Aggregations.Terms("tmps")
 	if !ok {

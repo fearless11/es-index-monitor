@@ -20,7 +20,7 @@ indices:
 - name: "crm-frontend-app-nginx"
   type: "eq"
   include: "status=400"
-  # 查询间隔
+  # 查询间隔 分钟
   interval: 720
   # 告警阈值
   overcount: 80
@@ -42,11 +42,14 @@ indices:
 - name: "gitlab"
   type: "agg"
   interval: 60
-  overcount: 100
+  overcount: 80
   # 聚合字段=聚合排序后top5
-  include: "user=5"
-  # 排除个例
-  exclude: "user=-;user=Tom"
+  # https://www.elastic.co/guide/en/elasticsearch/reference/6.5/search-aggregations-bucket-terms-aggregation.html#search-aggregations-bucket-terms-aggregation-script
+  # https://blog.csdn.net/qq_28988969/article/details/84337405
+  include: "doc['user'].values + '@' + doc['userip'].values=30"
+  # 正则表达式 排除个例 [-]@[10.11.11.11]
+  # https://www.elastic.co/guide/en/elasticsearch/reference/6.5/search-aggregations-bucket-terms-aggregation.html#_filtering_values_3
+  exclude: ".*-.*"
   
 alert:
   url: "http://127.0.0.1:9000/api/v1/alert"
