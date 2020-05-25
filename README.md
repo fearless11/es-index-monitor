@@ -1,4 +1,17 @@
 
+## 部署
+
+- 机器：10.11.100.230 
+- 目录：cd /usr/local/monitor/es-index-monitor
+- 启停：sh check.sh start|stop
+- cron: /etc/cron.d/es-index-monitor
+
+## es日志监控
+
+- web日志: 日志状态码、日志响应耗时
+- 业务日志：错误级别数
+- gitlab日志: 用户-IP拉取次数
+
 ## 功能
 
     条件: 索引为name-yyyy.MM.dd, 时间字段为@timestamp
@@ -13,36 +26,3 @@
   
   `count(top(agg(A))) && !(A=xx) > threshold in  5minute`
 
-
-## elastic数据迁移
-
-[eslasticdump](https://github.com/taskrabbit/elasticsearch-dump?utm_source=dbweekly&utm_medium=email)
-
-```bash
-# install npm
-cd /opt/
-wget https://nodejs.org/dist/v10.16.0/node-v10.16.0-linux-x64.tar.xz
-xz -d node-v10.16.0-linux-x64.tar.xz
-tar -xvf node-v10.16.0-linux-x64.tar
-ln -s /opt/nodejs/node-v10.16.0-linux-x64/bin/node /usr/local/bin/node
-ln -s /opt/nodejs/node-v10.16.0-linux-x64/bin/npm /usr/local/bin/npm
-cp ~/.bash_profile /home/bash_profile
-echo 'export PATH=$PATH:/opt/node-v10.16.0-linux-x64/bin' >> ~/.bash_profile
-source ~/.bash_profile
-
-# global  install elasticdump 
-npm install elasticdump -g
-
-# test
-elasticdump --help
-
-# migration
-elasticdump --input=http://elastic:elastic@10.11.40.66:9200/gitlab-2020.04.28 --output=gitlab_mapping.json --type=mapping
-elasticdump --input=http://elastic:elastic@10.11.40. 66:9200/gitlab-2020.04.28 
---output=gitlab_data.json 
---type=data
-
-elasticdump --input=http://elastic:elastic@10.11.40.66:9200/gitlab-2020.04.28 --output=http://10.51.1.31:9201/gitlab-2020.04.28 --type=mapping
-elasticdump --input=http://elastic:elastic@10.11.40.66:9200/gitlab-2020.04.28 --output=http://10.51.1.31:9201/gitlab-2020.04.28 --type=data
-
-```
